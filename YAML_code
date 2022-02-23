@@ -1,0 +1,223 @@
+uid: Roomba_test
+tags: []
+props:
+  parameters:
+    - description: Title of the card
+      label: Title
+      name: title
+      required: false
+      type: TEXT
+    - description: Header text
+      label: Header
+      name: header
+      required: false
+      type: TEXT
+    - description: Footer text
+      label: Footer
+      name: footer
+      required: false
+      type: TEXT
+    - context: item
+      description: Item for minutes since the begin of the current Mission (TODO, likely via a rule & custom item!)
+      label: Minutes running
+      name: runtime
+      required: true
+      type: TEXT
+    - context: item
+      description: Item for tracking the current Battery Percentage
+      label: Battery
+      name: battery
+      required: true
+      type: TEXT
+    - context: item
+      description: Item for tracking the current State (charge,run, resume, recharge, stuck, stop, pause (etc.)
+      label: State
+      name: state
+      required: true
+      type: TEXT
+    - context: item
+      description: Item to send Commands to (clean, pause, dock,reset)
+      label: Command
+      name: command
+      required: true
+      type: TEXT
+    - context: item
+      description: Item for Mission State
+      label: Mission
+      name: mission
+      required: true
+      type: TEXT
+    - context: item
+      description: Item for tracking Error Codes (i.e. Bin Full, Docking Issue, etc.)
+      label: Error
+      name: error
+      required: true
+      type: TEXT
+    - context: item
+      description: Item for bin state (i.e. Bin Full)
+      label: Bin
+      name: bin
+      required: false
+      type: TEXT
+timestamp: Feb 23, 2022, 4:12:30 PM
+component: f7-card
+config:
+  title: =(props.title)
+slots:
+  default:
+    - component: f7-card-content
+      config:
+        style:
+          height: 200px
+      slots:
+        default:
+          - component: f7-icon
+            config:
+              f7: '=items[props.bin].state == "ok" ? "bin_xmark" : "arrow_up_bin_fill"'
+              style:
+                color: '=items[props.bin].state == "ok" ? "green" : "red"'
+          - component: f7-icon
+            config:
+              f7: .
+              style:
+                opacity: 0
+          - component: Label
+            config:
+              style:
+                color: '=((items[props.battery].state> 78) ? "green" : ((items[props.battery].state> 69) ? "green" : ((items[props.battery].state> 58) ? "green" : ((items[props.battery].state> 38) ? "orange" : "red"))))'
+                float: right
+                fontSize: 18px
+              text: = items[props.battery].state + ' %'
+          - component: f7-icon
+            config:
+              f7: .
+              style:
+                float: right
+                opacity: 0
+          - component: oh-icon
+            config:
+              icon: '=((items[props.battery].state> 78) ? "batterylevel-100" : ((items[props.battery].state> 69) ? "batterylevel-80" : ((items[props.battery].state> 58) ? "batterylevel-60" : ((items[props.battery].state> 38) ? "batterylevel-50" : "batterylevel-20"))))'
+              style:
+                float: right
+                height: 28px
+          - component: f7-icon
+            config:
+              f7: .
+              style:
+                float: right
+                opacity: 0
+          - component: f7-icon
+            config:
+              f7: '=items[props.state].state !== "charge" ? "" : "bolt"'
+              style:
+                color: '=items[props.state].state == "charge" ? "green" : "red"'
+                float: right
+          - component: f7-row
+            config:
+              class:
+                - display-flex
+                - justify-content-center
+              style:
+                width: 100%
+            slots:
+              default:
+                - component: f7-col
+                  config:
+                    style:
+                      height: 100%
+                      width: 180px
+                  slots:
+                    default:
+                      - component: f7-block-header
+                        slots:
+                          default:
+                            - component: Label
+                              config:
+                                style:
+                                  color: white
+                                text: =props.header
+                      - component: oh-image
+                        config:
+                          style:
+                            filter: drop-shadow(16px 16px 20px black)
+                            left: 50%
+                            position: absolute
+                            transform: translate(-50%)
+                            width: 180px
+                          url: /static/roomba.png
+                      - component: f7-block
+                        config:
+                          style:
+                            height: auto
+                            width: auto
+                        slots:
+                          default:
+                            - component: f7-block
+                              config:
+                                style:
+                                  left: 46px
+                                  top: 46px
+                                  z-index: 10
+                              slots:
+                                default:
+                                  - component: oh-link
+                                    config:
+                                      action: options
+                                      actionItem: =[props.command]
+                                      actionOptions: clean=Clean,macak=Macak,spot=Spot,pause=Pause,stop=Stop,dock=Dock,reset=Reset
+                                      color: green
+                                      f7: circle_fill
+                                      size: 35
+                                      style:
+                                        background: '=(items[props.state].state == "charge") ? "" : (items[props.state].state == "hmUsrDock") ? "blue" : ((items[props.state].state == "run" ? "green" : "red"))'
+                                        border-radius: 50%
+                                        height: 22px
+                                        width: 22px
+                                        
+                            - component: f7-block
+                              slots:
+                                default:
+                                  - component: f7-preloader
+                                    config:
+                                      colorTheme: green
+                                      size: 30
+                                      style:
+                                        left: 58px
+                                        position: absolute
+                                        top: 13px
+                                        z-index: 8
+                                      visible: =items[props.state].state == "run"
+    - component: f7-block
+      slots:
+        default:
+          - component: Label
+            config:
+              size: 20
+              style:
+                color: red
+                white-space: nowrap
+              text: "=items[((!props.error) ? '' : props.error)].displayState"
+              visible: =items[props.error].state != 0
+    - component: f7-card-footer
+      config:
+        visible: =[props.footer]
+      slots:
+        default:
+          - component: Label
+            config:
+              size: 60
+              style:
+                color: grey
+                font-weight: bold
+              text: '=items[props.state].state == "charge" ? "" : items[props.state].displayState'
+              visible: =[props.footer]
+          - component: f7-block
+            slots: {}
+          - component: Label
+            config:
+              size: 20
+              style:
+                color: gray
+                font-weight: bold
+                white-space: nowrap=items[props.mission].state
+              text: '=items[props.mission].state == "none" ? "" : items[props.mission].state'
