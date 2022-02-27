@@ -164,7 +164,7 @@ slots:
                                     config:
                                       action: options
                                       actionItem: =[props.command]
-                                      actionOptions: clean=Clean,macak=Macak,spot=Spot,pause=Pause,stop=Stop,dock=Dock,reset=Reset
+                                      actionOptions: clean=Clean,spot=Spot,pause=Pause,stop=Stop,dock=Dock,reset=Reset
                                       color: green
                                       f7: circle_fill
                                       size: 35
